@@ -150,6 +150,9 @@
     font-family:'Poppins',sans-serif; font-size:1.05rem; background:var(--panel-2); color:var(--ink);
     transition:border-color .2s ease;
   }
+  .field input[type="text"]::placeholder, .field input[type="email"]::placeholder{
+    color:rgba(255,255,255,0.75); opacity:1;
+  }
   .field input:focus{ outline:none; border-color:var(--gold); }
   .field input:focus-visible{ outline:2px solid var(--gold); outline-offset:1px; }
 
