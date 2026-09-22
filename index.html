@@ -58,7 +58,11 @@
   .tab-btn:not(.active):hover{ color:var(--ink); background:rgba(212,175,55,0.12); }
   .tab-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
 
+  .lights-garland{ display:block; width:100%; height:30px; }
+
   .panel{ display:none; animation:fade .35s ease; }
+
+
   .panel.active{ display:block; }
   @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
 
@@ -362,7 +366,38 @@
       <button class="tab-btn" data-tab="admin" role="tab" aria-selected="false">Admin Only</button>
     </div>
   </nav>
+  <svg class="lights-garland" viewBox="0 0 1400 36" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <filter id="bulbGlow" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="3.2" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <line x1="0" y1="3" x2="1400" y2="3" stroke="#4a3a20" stroke-width="1.5" opacity="0.7"/>
+    <g id="garland-bulbs"></g>
+  </svg>
 </header>
+<script>
+(function(){
+  var colors = ["#E0455A","#F0D77B","#3E8E52","#ffffff"];
+  var g = document.getElementById("garland-bulbs");
+  if (!g) return;
+  var spacing = 90, count = Math.ceil(1400 / spacing) + 1;
+  for (var i = 0; i < count; i++){
+    var x = i * spacing + 40;
+    var color = colors[i % colors.length];
+    var wire = document.createElementNS("http://www.w3.org/2000/svg","line");
+    wire.setAttribute("x1", x); wire.setAttribute("y1", 3);
+    wire.setAttribute("x2", x); wire.setAttribute("y2", 20);
+    wire.setAttribute("stroke", "#4a3a20"); wire.setAttribute("stroke-width", "1.2"); wire.setAttribute("opacity","0.7");
+    g.appendChild(wire);
+    var bulb = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    bulb.setAttribute("cx", x); bulb.setAttribute("cy", 25); bulb.setAttribute("r", 5.5);
+    bulb.setAttribute("fill", color); bulb.setAttribute("filter", "url(#bulbGlow)");
+    g.appendChild(bulb);
+  }
+})();
+</script>
 
 <main>
   <!-- ===== REGISTER PANEL ===== -->
@@ -370,7 +405,7 @@
     <div class="landing-grid">
       <div class="details-col">
         <div class="eyebrow">CNL CR Social Club Presents</div>
-        <h1>2026 <em>Christmas Gala</em></h1>
+        <h1>🎄 2026 <em>Christmas Gala</em> 🎄</h1>
         <p class="tagline">Enjoy an evening of dinner, dancing and socializing!</p>
         <div class="event-meta">
           <div class="row"><span class="tag">Date</span> Saturday, December 12, 2026</div>
@@ -379,30 +414,6 @@
             <a class="map-link" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Chalk+River+Area+Lions+Hall">View on map</a></span>
           </div>
           <div class="row"><span class="tag">Schedule</span> Doors open 5:00 PM · Cocktails 5:30 PM · Hors d'oeuvres 5:50 PM · Dinner 6:30 PM · Late lunch</div>
-        </div>
-        <div class="contact-note">📱 Tickets on sale now — text 613-401-5142 or email us</div>
-
-        <div class="highlights-col">
-          <div class="option-card opt1">
-            <h3>Individual Ticket</h3>
-            <span class="opt-price">$50 / ticket</span>
-            <ul>
-              <li>Cocktails &amp; hors d'oeuvres</li>
-              <li>Roast beef &amp; roast turkey dinner</li>
-              <li>Late lunch</li>
-              <li>Live DJ, dancing &amp; socializing</li>
-            </ul>
-          </div>
-          <div class="option-card opt2">
-            <h3>Table of 10</h3>
-            <span class="opt-price">$500 / table</span>
-            <ul>
-              <li>Reserved table seating 10 guests</li>
-              <li>Full evening — dinner through late lunch</li>
-              <li>Great for families &amp; groups</li>
-              <li>Same full gala experience</li>
-            </ul>
-          </div>
         </div>
 
         <div class="menu-box">
@@ -449,7 +460,7 @@
                   <select id="reg-individual" class="ticket-select"></select>
                 </div>
                 <div class="ticket-row">
-                  <span class="ticket-name">Table of 10 <small>seats 10 guests</small></span>
+                  <span class="ticket-name">Reserved table of 10 <small>seats 10 guests</small></span>
                   <span class="ticket-price">$500</span>
                   <select id="reg-table" class="ticket-select"></select>
                 </div>
