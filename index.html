@@ -96,7 +96,7 @@
 
   .event-meta{ margin-top:24px; display:flex; flex-direction:column; gap:10px; }
   .event-meta .row{ display:flex; align-items:flex-start; gap:10px; font-size:0.94rem; color:var(--ink); }
-  .event-meta .tag{ font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color:#1a0d02; background:var(--gold); border-radius:5px; padding:3px 8px; margin-top:1px; flex:none; }
+  .event-meta .tag{ font-family:'JetBrains Mono',monospace; font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase; color:#1a0d02; background:var(--gold); border-radius:5px; padding:3px 8px; margin-top:1px; flex:none; width:78px; text-align:center; }
   .event-meta a.map-link{ color:var(--gold); text-decoration:underline; text-decoration-color:rgba(212,175,55,0.4); text-underline-offset:3px; }
 
   .contact-note{
@@ -486,10 +486,10 @@
               </div>
 
               <div class="field">
-                <label for="reg-pickup">Ticket Pickup</label>
+                <label for="reg-pickup">Ticket pickup (see Notes)</label>
                 <select id="reg-pickup" class="pickup-select">
-                  <option value="On site (see Notes)">On site (see Notes)</option>
-                  <option value="At Door">At Door</option>
+                  <option value="On site">On site</option>
+                  <option value="At the door">At the door</option>
                 </select>
               </div>
 
@@ -906,7 +906,7 @@
     confirmToggleBtn.setAttribute("aria-pressed", "false");
     individualSelect.value = "0";
     tableSelect.value = "0";
-    pickupSelect.value = "On site (see Notes)";
+    pickupSelect.value = "On site";
     refreshTotals();
     updateSubmitState();
     confirmView.hidden = true;
