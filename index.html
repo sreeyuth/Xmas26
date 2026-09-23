@@ -441,13 +441,13 @@
           </ul>
         </div>
 
-        <p class="age-note-title">Please note:</p>
+        <p class="age-note-title">Notes:</p>
         <ol class="age-note">
           <li>This is an adult event.</li>
           <li>A vegetarian option is available — please request it in advance using the Dietary Restrictions field below.</li>
           <li>Tickets can be picked up in one of two ways:
             <ul class="age-subnote">
-              <li>On-site before the event from Gail Magill (B1565) or Sreeyuth Lal (B469)</li>
+              <li>On site at CRL before the event from Gail Magill (B1565) or Sreeyuth Lal (B469)</li>
               <li>At the door</li>
             </ul>
           </li>
@@ -488,7 +488,7 @@
               <div class="field">
                 <label for="reg-pickup">Ticket Pickup</label>
                 <select id="reg-pickup" class="pickup-select">
-                  <option value="On-site">On-site</option>
+                  <option value="On site (see Notes)">On site (see Notes)</option>
                   <option value="At Door">At Door</option>
                 </select>
               </div>
@@ -906,7 +906,7 @@
     confirmToggleBtn.setAttribute("aria-pressed", "false");
     individualSelect.value = "0";
     tableSelect.value = "0";
-    pickupSelect.value = "On-site";
+    pickupSelect.value = "On site (see Notes)";
     refreshTotals();
     updateSubmitState();
     confirmView.hidden = true;
