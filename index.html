@@ -135,6 +135,9 @@
   .age-note li{ margin-bottom:6px; }
   .age-note li:last-child{ margin-bottom:0; }
   .age-note li::marker{ color:var(--gold); font-weight:700; }
+  .age-subnote{ list-style:disc; margin:6px 0 0 0; padding-left:20px; }
+  .age-subnote li{ margin-bottom:4px; }
+  .age-subnote li::marker{ color:var(--gold-light); font-weight:400; }
 
   /* ===== REGISTRATION CARD ===== */
   .ticket-stub{
@@ -157,6 +160,13 @@
   .field input:focus-visible{ outline:2px solid var(--gold); outline-offset:1px; }
 
   .ticket-types{ margin-bottom:24px; }
+  select.pickup-select{
+    width:100%; padding:15px 16px; border-radius:11px; border:1.5px solid var(--line);
+    font-family:'Poppins',sans-serif; font-size:1.05rem; background:var(--panel-2); color:var(--ink);
+    cursor:pointer;
+  }
+  select.pickup-select:focus{ outline:none; border-color:var(--gold); }
+  select.pickup-select:focus-visible{ outline:2px solid var(--gold); outline-offset:1px; }
   .ticket-note{ font-size:0.84rem; color:var(--ink-soft); margin:-2px 0 10px 0; font-style:italic; }
   .ticket-row{ display:grid; grid-template-columns:1fr 64px auto; align-items:center; gap:14px; padding:13px 4px; border-bottom:1px solid var(--line); }
   .ticket-row:last-child{ border-bottom:none; }
@@ -433,8 +443,14 @@
 
         <p class="age-note-title">Please note:</p>
         <ol class="age-note">
-          <li>Tables can be reserved with a purchase of 10 tickets (i.e. one Table of 10).</li>
+          <li>This is an adult event.</li>
           <li>A vegetarian option is available — please request it in advance using the Dietary Restrictions field below.</li>
+          <li>Tickets can be picked up in one of two ways:
+            <ul class="age-subnote">
+              <li>On-site before the event from Gail Magill (B1565) or Sreeyuth Lal (B469)</li>
+              <li>At the door</li>
+            </ul>
+          </li>
         </ol>
       </div>
 
@@ -458,15 +474,23 @@
                 <label>Tickets</label>
                 <p class="ticket-note">Choose individual tickets, a full table of 10, or both.</p>
                 <div class="ticket-row">
-                  <span class="ticket-name">Individual Ticket <small>$50 each</small></span>
+                  <span class="ticket-name">Individual Ticket</span>
                   <span class="ticket-price">$50</span>
                   <select id="reg-individual" class="ticket-select"></select>
                 </div>
                 <div class="ticket-row">
-                  <span class="ticket-name">Reserved table of 10 <small>seats 10 guests</small></span>
+                  <span class="ticket-name">Reserved Table of 10</span>
                   <span class="ticket-price">$500</span>
                   <select id="reg-table" class="ticket-select"></select>
                 </div>
+              </div>
+
+              <div class="field">
+                <label for="reg-pickup">Ticket Pickup</label>
+                <select id="reg-pickup" class="pickup-select">
+                  <option value="On-site">On-site</option>
+                  <option value="At Door">At Door</option>
+                </select>
               </div>
 
               <div class="field">
@@ -506,7 +530,7 @@
           <div id="confirm-view" class="confirmation" hidden>
             <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" fill="#D4AF37"/><path d="M20 33 L28 41 L45 23" stroke="#0B0705" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
             <h3>Thank you!</h3>
-            <p>Your spot is reserved. Further details will be sent by e-mail by CR Social Club. See you at the Gala!</p>
+            <p>Your spot is reserved. Please make sure to pick up the tickets using your selected option. See you at the Gala!</p>
             <button type="button" id="register-another">Register another party</button>
           </div>
 
@@ -616,6 +640,7 @@
   const individualSelect = document.getElementById("reg-individual");
   const tableSelect = document.getElementById("reg-table");
   const dietaryInput = document.getElementById("reg-dietary");
+  const pickupSelect = document.getElementById("reg-pickup");
   const totalAmountEl = document.getElementById("total-amount");
   const etransferAmountEl = document.getElementById("etransfer-amount");
   const confirmToggleBtn = document.getElementById("etransfer-confirm-btn");
@@ -854,6 +879,7 @@
       individual: counts.individual,
       tables: counts.tables,
       dietary: dietaryInput.value.trim() || null,
+      pickup: pickupSelect.value,
       partySize: currentPartySize(),
       total: currentTotal(),
       timestamp: Date.now()
@@ -880,6 +906,7 @@
     confirmToggleBtn.setAttribute("aria-pressed", "false");
     individualSelect.value = "0";
     tableSelect.value = "0";
+    pickupSelect.value = "On-site";
     refreshTotals();
     updateSubmitState();
     confirmView.hidden = true;
@@ -982,11 +1009,12 @@
           r.name || "",
           r.email || "",
           r.dietary || "—",
+          r.pickup || "—",
           parts.length ? parts.join(" / ") : "—",
           String(r.partySize || 0),
           "$" + (r.total || 0).toFixed(2),
           r.paymentDone === "Paid" ? "Paid" : "Payment pending review",
-          r.emailStatus || "No email sent"
+          r.emailStatus || "Tickets not picked up"
         ];
       });
       const totalGuests = regs.reduce((s,r) => s + (r.partySize||0), 0);
@@ -995,7 +1023,7 @@
       const totalAmount = regs.reduce((s,r) => s + (r.total||0), 0);
 
       doc.autoTable({
-        head: [["Attendance","Name","Email","Dietary","Tickets","Party Size","Total Amount","Payment","Conf Email"]],
+        head: [["Attendance","Name","Email","Dietary","Pickup Method","Tickets","Party Size","Total Amount","Payment","Ticket Status"]],
         body: body,
         startY: 28,
         styles: { fontSize: 8 },
@@ -1051,14 +1079,13 @@
     let rows = "";
     regs.forEach(r => {
       const paid = r.paymentDone === "Paid";
-      const emailStatus = r.emailStatus || "No email sent";
-      const emailClass = emailStatus === "Tickets sent" ? "is-tickets" : (emailStatus === "Acknwldg. sent" ? "is-ack" : "is-none");
+      const emailStatus = r.emailStatus || "Tickets not picked up";
+      const emailClass = emailStatus === "Tickets picked up" ? "is-tickets" : "is-none";
       let paymentCell;
       if (paymentUnlocked){
         const emailSelect = `<select class="email-status-select ${emailClass}" data-id="${r.id}">
-            <option value="No email sent" ${emailStatus === "No email sent" ? "selected" : ""}>No email sent</option>
-            <option value="Acknwldg. sent" ${emailStatus === "Acknwldg. sent" ? "selected" : ""}>Acknwldg. sent</option>
-            <option value="Tickets sent" ${emailStatus === "Tickets sent" ? "selected" : ""}>Tickets sent</option>
+            <option value="Tickets not picked up" ${emailStatus === "Tickets not picked up" ? "selected" : ""}>Tickets not picked up</option>
+            <option value="Tickets picked up" ${emailStatus === "Tickets picked up" ? "selected" : ""}>Tickets picked up</option>
           </select>`;
         paymentCell = `<div class="status-cell">
             <select class="payment-select ${paid ? 'is-paid' : 'is-notpaid'}" data-id="${r.id}">
@@ -1082,6 +1109,7 @@
         <td>${escapeHtml(r.name)}</td>
         <td>${escapeHtml(r.email || "—")}</td>
         <td>${escapeHtml(r.dietary || "—")}</td>
+        <td>${escapeHtml(r.pickup || "—")}</td>
         <td>${r.partySize}${breakdown}</td>
         <td class="amt">$${(r.total||0).toFixed(2)}</td>
         <td>${paymentCell}</td>
@@ -1090,7 +1118,7 @@
     });
 
     wrap.innerHTML = `<table class="roster">
-      <thead><tr><th>Name</th><th>Email</th><th>Dietary Restrictions</th><th>Party Size</th><th>Total Amount</th><th>Registration Status</th><th></th></tr></thead>
+      <thead><tr><th>Name</th><th>Email</th><th>Dietary Restrictions</th><th>Pickup Method</th><th>Party Size</th><th>Total Amount</th><th>Registration Status</th><th></th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
 
@@ -1112,9 +1140,9 @@
         sel.disabled = true;
         const ok = await updateEmailStatus(sel.dataset.id, sel.value);
         sel.disabled = false;
-        sel.classList.remove("is-none","is-ack","is-tickets");
+        sel.classList.remove("is-none","is-tickets");
         if (ok){
-          sel.classList.add(sel.value === "Tickets sent" ? "is-tickets" : (sel.value === "Acknwldg. sent" ? "is-ack" : "is-none"));
+          sel.classList.add(sel.value === "Tickets picked up" ? "is-tickets" : "is-none");
         }
       });
     });
