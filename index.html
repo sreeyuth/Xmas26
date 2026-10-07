@@ -579,9 +579,10 @@
 
       <div class="payment-gate" id="payment-gate">
         <svg viewBox="0 0 24 24" fill="none"><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        <span>Registration Status is view-only. Enter the code to edit it.</span>
+        <span id="payment-gate-label">Registration Status is view-only. Enter the code to edit it.</span>
         <input type="password" id="payment-password" inputmode="numeric" maxlength="8" placeholder="Code" autocomplete="off">
         <button class="payment-unlock-btn" id="payment-unlock-btn">Unlock editing</button>
+        <button class="payment-unlock-btn" id="payment-save-btn" hidden>Save changes</button>
         <span class="payment-error" id="payment-error"></span>
       </div>
 
@@ -951,6 +952,10 @@
   document.getElementById("toggle-reg-btn").addEventListener("click", async () => {
     const btn = document.getElementById("toggle-reg-btn");
     const currentlyOpen = btn.dataset.current === "open";
+    if (currentlyOpen){
+      const confirmed = confirm("Are you sure you want to close registration? People will no longer be able to register.");
+      if (!confirmed) return;
+    }
     btn.disabled = true;
     const ok = await setRegistrationOpen(!currentlyOpen);
     btn.disabled = false;
@@ -963,14 +968,19 @@
 
   /* ---------- Payment Status gate (separate passcode) ---------- */
   const paymentGate = document.getElementById("payment-gate");
+  const paymentGateLabel = document.getElementById("payment-gate-label");
   const paymentPasswordInput = document.getElementById("payment-password");
   const paymentError = document.getElementById("payment-error");
   const paymentUnlockBtn = document.getElementById("payment-unlock-btn");
+  const paymentSaveBtn = document.getElementById("payment-save-btn");
 
   function tryPaymentUnlock(){
     if (paymentPasswordInput.value === PAYMENT_CODE){
       paymentUnlocked = true;
-      paymentGate.hidden = true;
+      paymentPasswordInput.hidden = true;
+      paymentUnlockBtn.hidden = true;
+      paymentSaveBtn.hidden = false;
+      paymentGateLabel.textContent = "Registration Status editing is unlocked.";
       paymentError.textContent = "";
       loadRoster();
     } else {
@@ -981,6 +991,16 @@
   }
   paymentUnlockBtn.addEventListener("click", tryPaymentUnlock);
   paymentPasswordInput.addEventListener("keydown", (e) => { if (e.key === "Enter") tryPaymentUnlock(); });
+
+  paymentSaveBtn.addEventListener("click", () => {
+    paymentUnlocked = false;
+    paymentPasswordInput.value = "";
+    paymentPasswordInput.hidden = false;
+    paymentUnlockBtn.hidden = false;
+    paymentSaveBtn.hidden = true;
+    paymentGateLabel.textContent = "Registration Status is view-only. Enter the code to edit it.";
+    loadRoster();
+  });
 
   document.getElementById("refresh-btn").addEventListener("click", loadRoster);
 
@@ -1114,7 +1134,7 @@
         <td>${r.partySize}${breakdown}</td>
         <td class="amt">$${(r.total||0).toFixed(2)}</td>
         <td>${paymentCell}</td>
-        <td><button class="del-btn" data-id="${r.id}">Remove</button></td>
+        <td>${paymentUnlocked ? `<button class="del-btn" data-id="${r.id}">Delete</button>` : ""}</td>
       </tr>`;
     });
 
@@ -1150,6 +1170,8 @@
 
     wrap.querySelectorAll(".del-btn").forEach(btn => {
       btn.addEventListener("click", async () => {
+        const confirmed = confirm("Are you sure you want to delete this entry? This cannot be undone.");
+        if (!confirmed) return;
         btn.disabled = true;
         btn.textContent = "...";
         await deleteRegistration(btn.dataset.id);
